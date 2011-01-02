@@ -46,6 +46,9 @@ OBJ = .o
 SO  = .so
 
 CFLAGS += -DWASP_SO='".so"'
+### OpenGL support
+CFLAGS += -I/usr/X11R6/include
+LDFLAGS += -L/usr/X11R6/lib -lGL -lGLU -lX11
 ### Disabled until lib/build and bin/waspc understands subsystems.
 # EXEFLAGS += -rdynamic -ldl
 PLATFORM = unix

@@ -64,6 +64,8 @@ void wasp_init_core_subsystems( ){
     wasp_init_curve25519_subsystem( );
     wasp_init_salsa20_subsystem( );
 
+    wasp_init_opengl_subsystem( );
+
     wasp_ss_main = wasp_symbol_fs( "main" );
 
     wasp_bind_core_prims( );

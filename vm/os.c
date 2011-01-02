@@ -727,11 +727,13 @@ WASP_GENERIC_COMPARE( os_connection )
 WASP_C_SUBTYPE2( os_connection, "os-connection", connection );
 
 void wasp_free_os_service( wasp_os_service svc ){ 
+    printf("freeing os_service\n");
     event_del( &(svc->event) ); 
     wasp_objfree( (wasp_object)svc );
 }
 
 void wasp_trace_os_service( wasp_os_service svc ){
+    printf("Tracing os service\n");
     wasp_trace_input( (wasp_input)svc );
 }
 WASP_GENERIC_FORMAT( os_service )
