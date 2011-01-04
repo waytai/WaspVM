@@ -20,4 +20,5 @@
 (import "mosref/prop/online")
 (import "mosref/prop/platform")
 (import "mosref/prop/port")
+(import "mosref/prop/retry")
 

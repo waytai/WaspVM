@@ -131,4 +131,12 @@
          #f)
         (else (error 'parse "expected boolean value" (format val)))))
 
-(export parse-flag parse-port)
+(define (parse-timeout s)
+  (define n (guard (lambda (x) (error 'parse "expected an integer" s))
+                   (string->integer s)))
+  (when (< n 0)
+    (error 'parse "expected a timeout value of zero or more milliseconds." n))
+  n)
+
+
+(export parse-flag parse-port parse-timeout)

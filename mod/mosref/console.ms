@@ -72,36 +72,47 @@
   (step "Affiliation complete.")
   (list command report))
 
-(define (make-drone-exe console-addr sin console-portno console-public platform)
+(define (make-drone-exe console-addr sin console-portno console-public platform retry)
   (build-exe platform
              `((import "mosref/drone")
                (import "mosref/transport")
                (import "lib/bridge")
-               (define conn (tcp-connect ,console-addr ,console-portno))
-               (send ,sin conn)
-               (define endpoint 
-                 (apply spawn-endpoint 
-                        drone-endpoint
-                        drone-broken
-                        (drone-affiliation ,console-public
-                                           (output conn)
-                                           (input conn))))
+               (define conn #f)
+	       (define endpoint #f)
 
-               ;TODO: Send the next two statements when the drone affiliates..
-               (define (import key)
-                  (unless (imported? key)
-                    (define lane (make-lane endpoint))
-                    (define xmit (lane-xmit lane))
-                    (define recv (lane-recv lane))
-                    (send (string-append key ".mo") xmit)
-                    (define data (wait recv))
-                    (send 'close xmit)
-                    (unless (string? data)
-                      (error 'import "could not retrieve module from console"
-                             key))
-                    ((thaw data))))
+	       (until (and conn endpoint)
+		 (guard (lambda (err)
+			  (unless ,retry (re-error err))
+			  (traceback err)
+			  (when conn 
+			    (send 'close conn)
+			    (set! conn #f))
+			  (pause ,retry))
+                   (set! conn (tcp-connect ,console-addr ,console-portno))
+                   (send ,sin conn)
+                   (set! endpoint 
+                     (apply spawn-endpoint 
+                            drone-endpoint
+                            drone-broken
+                            (drone-affiliation ,console-public
+                                               (output conn)
+                                               (input conn))))))
 
-               (export import)))) ; Be afraid, be very afraid..
+                 ;TODO: Send the next two statements when the drone affiliates..
+                 (define (import key)
+                    (unless (imported? key)
+                      (define lane (make-lane endpoint))
+                      (define xmit (lane-xmit lane))
+                      (define recv (lane-recv lane))
+                      (send (string-append key ".mo") xmit)
+                      (define data (wait recv))
+                      (send 'close xmit)
+                      (unless (string? data)
+                        (error 'import "could not retrieve module from console"
+                               key))
+                      ((thaw data))))
+
+                 (export import)))) ; Be afraid, be very afraid..
 
 (define (console-endpoint bridge) 
   (define path (wait))
